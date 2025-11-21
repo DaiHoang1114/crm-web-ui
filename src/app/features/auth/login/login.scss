@@ -1,14 +1,179 @@
+// Import variables
+@use '../../../../styles/variables' as *;
+
 .login-container {
   display: flex;
-  flex-direction: column;
   align-items: center;
   justify-content: center;
   min-height: 100vh;
-  gap: 1rem;
+  background-color: $background-color;
+  padding: 20px;
+}
+
+.login-card {
+  background: white;
+  border-radius: $border-radius-md;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  padding: 48px 40px;
+  width: 100%;
+  max-width: 440px;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: $spacing-sm;
+  margin-bottom: $spacing-xl;
+
+  svg {
+    width: 32px;
+    height: 32px;
+  }
+
+  span {
+    font-size: $font-size-xl;
+    font-weight: 600;
+    color: $text-color;
+    letter-spacing: 0.5px;
+  }
+}
+
+.social-buttons {
+  display: flex;
+  gap: 12px;
+  margin-bottom: $spacing-lg;
 
   button {
-    padding: 0.5rem 2rem;
-    font-size: 1rem;
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: $spacing-sm;
+    padding: 10px 16px;
+    border: 1px solid $border-color;
+    border-radius: $border-radius-sm;
+    background: white;
+    font-size: $font-size-sm;
     cursor: pointer;
+    transition: all 0.2s;
+
+    &:hover {
+      border-color: #bbb;
+      background: #fafafa;
+    }
+  }
+
+  .btn-google {
+    color: $text-color;
+  }
+
+  .btn-facebook {
+    color: #1877F2;
+  }
+}
+
+.divider {
+  text-align: center;
+  margin: $spacing-lg 0;
+  position: relative;
+
+  &::before,
+  &::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    width: calc(50% - 60px);
+    height: 1px;
+    background: $border-color;
+  }
+
+  &::before {
+    left: 0;
+  }
+
+  &::after {
+    right: 0;
+  }
+
+  span {
+    color: $text-secondary;
+    font-size: $font-size-sm;
+  }
+}
+
+form {
+  // Remove .form-group styles - now using global styles
+
+  .form-options {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: $spacing-lg;
+    font-size: $font-size-sm;
+
+    .checkbox {
+      display: flex;
+      align-items: center;
+      gap: $spacing-sm;
+      cursor: pointer;
+
+      input[type="checkbox"] {
+        width: auto;
+        cursor: pointer;
+      }
+
+      span {
+        color: $text-color;
+      }
+    }
+
+    .forgot-link {
+      color: $primary-color;
+      text-decoration: none;
+
+      &:hover {
+        text-decoration: underline;
+      }
+    }
+  }
+
+  .btn-signin {
+    width: 100%;
+    padding: 12px;
+    background: #4285F4;
+    color: white;
+    border: none;
+    border-radius: $border-radius-sm;
+    font-size: $font-size-md;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.2s;
+
+    &:hover {
+      background: #357ae8;
+    }
+
+    &:disabled {
+      background: #ccc;
+      cursor: not-allowed;
+    }
+  }
+}
+
+.signup-link {
+  text-align: center;
+  margin-top: $spacing-lg;
+  font-size: $font-size-sm;
+  color: $text-secondary;
+
+  a {
+    color: $primary-color;
+    text-decoration: none;
+    font-weight: 500;
+
+    &:hover {
+      text-decoration: underline;
+    }
   }
 }
