@@ -1,6 +1,11 @@
 {
-  "name": "my-angular-app",
+  "name": "crm-web-ui",
   "version": "0.0.0",
+  "description": "A modern CRM web application built with Angular",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/DaiHoang1114/crm-web-ui.git"
+  },
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
