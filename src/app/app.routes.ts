@@ -2,10 +2,10 @@ import { Routes } from '@angular/router';
 import { authGuard } from './core/guards/auth-guard';
 
 export const routes: Routes = [
-  { path: '', redirectTo: '/home', pathMatch: 'full' },
   {
-    path: 'login',
-    loadComponent: () => import('./pages/auth/login/login').then(m => m.Login)
+    path: '',
+    redirectTo: '/home',
+    pathMatch: 'full'
   },
   {
     path: '',
@@ -19,8 +19,15 @@ export const routes: Routes = [
       {
         path: 'dashboard',
         loadComponent: () => import('./pages/dashboard/dashboard.component').then(m => m.DashboardComponent)
-      }
+      },
     ]
   },
-  { path: '**', redirectTo: '/home' }
+  {
+    path: 'unauthorized',
+    loadComponent: () => import('./pages/unauthorized/unauthorized.component').then(m => m.UnauthorizedComponent)
+  },
+  {
+    path: '**',
+    redirectTo: '/home'
+  }
 ];

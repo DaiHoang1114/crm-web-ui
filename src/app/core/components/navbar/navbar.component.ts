@@ -1,24 +1,52 @@
-import { Component, EventEmitter, Output } from '@angular/core';
-import { Router } from '@angular/router';
+import { Component, EventEmitter, Output, OnInit, inject } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { AuthService } from '../../services/auth.service';
 
 @Component({
   selector: 'app-navbar',
-  imports: [],
+  imports: [CommonModule],
   templateUrl: './navbar.component.html',
   styleUrl: './navbar.component.scss',
 })
-export class Navbar {
+export class Navbar implements OnInit {
   @Output() toggleSidebar = new EventEmitter<void>();
 
-  constructor(private router: Router) {}
+  private authService = inject(AuthService);
+  username: string = '';
+  isAuthenticated: boolean = false;
+
+  ngOnInit() {
+    this.isAuthenticated = this.authService.isLoggedIn();
+    if (this.isAuthenticated) {
+      this.username = this.authService.getUsername();
+    }
+  }
 
   onToggleSidebar(): void {
     this.toggleSidebar.emit();
   }
 
+  login(): void {
+    this.authService.login().subscribe({
+      next: () => {
+        this.isAuthenticated = true;
+        this.username = this.authService.getUsername();
+      },
+      error: (err) => {
+        console.error('Login error:', err);
+      }
+    });
+  }
+
   logout(): void {
-    localStorage.removeItem('token');
-    localStorage.removeItem('remember');
-    this.router.navigate(['/login']);
+    this.authService.logout().subscribe({
+      next: () => {
+        this.isAuthenticated = false;
+        this.username = '';
+      },
+      error: (err) => {
+        console.error('Logout error:', err);
+      }
+    });
   }
 }
