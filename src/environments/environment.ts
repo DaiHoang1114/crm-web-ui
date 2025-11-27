@@ -2,8 +2,11 @@ export const environment = {
   production: false,
   keycloak: {
     url: 'http://localhost:8080',
-    realm: 'crm',
+    realm: 'master',
     clientId: 'crm-web-ui',
   },
-  useKeycloak: false
+  crm: {
+    url: 'http://localhost:5062'
+  },
+  useKeycloak: true
 };

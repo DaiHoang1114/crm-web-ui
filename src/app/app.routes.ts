@@ -23,6 +23,10 @@ export const routes: Routes = [
     ]
   },
   {
+    path: 'user-profile',
+    loadComponent: () => import('./pages/user-profile/user-profile.component').then(m => m.UserProfileComponent)
+  },
+  {
     path: 'unauthorized',
     loadComponent: () => import('./pages/unauthorized/unauthorized.component').then(m => m.UnauthorizedComponent)
   },

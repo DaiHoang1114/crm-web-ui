@@ -38,8 +38,8 @@ export class SidebarComponent implements OnInit {
       items: [
         { label: 'General', icon: 'dashboard', route: '/home' },
         { label: 'Classic', icon: 'classic', route: '/dashboard' },
-        { label: 'Analytical', icon: 'analytics', route: '/analytics' },
-        { label: 'Campaign', icon: 'campaign', route: '/campaign' },
+        { label: 'Profile', icon: 'analytics', route: '/user-profile' },
+        // { label: 'Campaign', icon: 'campaign', route: '/campaign' },
         { label: 'Modern', icon: 'modern', route: '/modern', roles: ['admin'] }
       ]
     }

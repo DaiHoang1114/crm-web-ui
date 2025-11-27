@@ -61,4 +61,8 @@ export class AuthService {
   getKeycloakInstance() {
     return this.keycloak.getKeycloakInstance();
   }
+
+  updateUserProfile(firstName: string, lastName: string): Observable<void> {
+    return this.keycloak.updateUserProfile(firstName, lastName);
+  }
 }

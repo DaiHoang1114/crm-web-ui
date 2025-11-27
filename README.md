@@ -187,7 +187,6 @@ ng lint
 ## 🎯 Routing Structure
 
 ```typescript
-/login          - Login page (public)
 /home           - Home page (protected)
 /dashboard      - Dashboard with analytics (protected)
 ```

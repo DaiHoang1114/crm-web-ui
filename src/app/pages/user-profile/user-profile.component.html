@@ -1,0 +1,253 @@
+<div class="user-profile-container">
+  <!-- Loading State -->
+   @if (loading) {
+     <div class="loading-state">
+       <div class="spinner"></div>
+       <p>Loading profile...</p>
+     </div>
+   }
+
+  <!-- Profile Content -->
+   @if (!loading) {
+     <div class="profile-content">
+       <!-- Header Section -->
+       <div class="profile-header">
+         <div class="profile-header-background"></div>
+         <div class="profile-header-content">
+           <div class="avatar-section">
+             <div class="avatar-large">
+               {{ getInitials() }}
+             </div>
+             <button class="avatar-upload-btn" disabled title="Upload feature coming soon">
+               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                 <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
+                 <circle cx="12" cy="13" r="4"/>
+               </svg>
+             </button>
+           </div>
+
+           <div class="user-info">
+             <h1 class="user-name">{{ getFullName() }}</h1>
+             <p class="user-email">{{ userProfile?.email }}</p>
+             <div class="user-meta">
+               <span class="meta-item">
+                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                   <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                   <circle cx="12" cy="7" r="4"/>
+                 </svg>
+                 @{{ userProfile?.username }}
+               </span>
+               <span class="meta-item" [class.verified]="userProfile?.emailVerified">
+                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                   <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                   <polyline points="22 4 12 14.01 9 11.01"/>
+                 </svg>
+                 {{ userProfile?.emailVerified ? 'Verified' : 'Not Verified' }}
+               </span>
+             </div>
+           </div>
+         </div>
+       </div>
+
+       <!-- Main Content Grid -->
+       <div class="profile-grid">
+         <!-- Left Column - Profile Form -->
+         <div class="profile-section">
+           <div class="section-card">
+             <div class="section-header">
+               <h2>Personal Information</h2>
+               <p class="section-description">Update your personal details and information</p>
+             </div>
+
+             <!-- Success/Error Messages -->
+              @if (successMessage) {
+                <div class="alert alert-success">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                    <polyline points="22 4 12 14.01 9 11.01"/>
+                  </svg>
+                  {{ successMessage }}
+                </div>
+              }
+
+              @if (error) {
+                <div class="alert alert-error">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="10"/>
+                    <line x1="15" y1="9" x2="9" y2="15"/>
+                    <line x1="9" y1="9" x2="15" y2="15"/>
+                  </svg>
+                  {{ error }}
+                </div>
+              }
+
+             <form [formGroup]="profileForm" (ngSubmit)="updateUserProfile()" class="profile-form">
+               <div class="form-row">
+                 <div class="form-group">
+                   <label for="firstName">First Name *</label>
+                   <input
+                     type="text"
+                     id="firstName"
+                     formControlName="firstName"
+                     [class.error]="isFieldInvalid('firstName')"
+                     placeholder="Enter your first name"
+                   />
+
+                   @if (isFieldInvalid('firstName')) {
+                     <span class="error-message">
+                       {{ getFieldError('firstName') }}
+                     </span>
+                   }
+                 </div>
+
+                 <div class="form-group">
+                   <label for="lastName">Last Name *</label>
+                   <input
+                     type="text"
+                     id="lastName"
+                     formControlName="lastName"
+                     [class.error]="isFieldInvalid('lastName')"
+                     placeholder="Enter your last name"
+                   />
+
+                   @if (isFieldInvalid('lastName')) {
+                     <span class="error-message">
+                       {{ getFieldError('lastName') }}
+                     </span>
+                   }
+                 </div>
+               </div>
+
+               <div class="form-group">
+                 <label for="username">Username</label>
+                 <input
+                   type="text"
+                   id="username"
+                   formControlName="username"
+                   placeholder="Username (read-only)"
+                 />
+                 <span class="field-hint">Username cannot be changed</span>
+               </div>
+
+               <div class="form-group">
+                 <label for="email">Email Address</label>
+                 <input
+                   type="email"
+                   id="email"
+                   formControlName="email"
+                   placeholder="Email (read-only)"
+                 />
+                 <span class="field-hint">Contact administrator to change email</span>
+               </div>
+
+               <div class="form-actions">
+                 <button
+                   type="button"
+                   class="btn btn-secondary"
+                   (click)="resetForm()"
+                   [disabled]="saving"
+                 >
+                   Reset
+                 </button>
+                 <button
+                   type="submit"
+                   class="btn btn-primary"
+                   [disabled]="profileForm.invalid || saving"
+                 >
+                  @if (!saving) {
+                    <span>Save Changes</span>
+                  }
+
+                  @if (saving) {
+                    <span class="saving-text">
+                      <span class="spinner-small"></span>
+                      Saving...
+                    </span>
+                  }
+                 </button>
+               </div>
+             </form>
+           </div>
+         </div>
+
+         <!-- Right Column - Additional Info -->
+         <div class="sidebar-section">
+           <!-- Roles Card -->
+           <div class="section-card">
+             <div class="section-header">
+               <h3>Roles & Permissions</h3>
+             </div>
+             <div class="roles-list">
+               <div *ngFor="let role of roles" class="role-badge">
+                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                   <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                 </svg>
+                 {{ role }}
+               </div>
+               @if (roles.length === 0) {
+                 <p class="no-roles">No roles assigned</p>
+               }
+             </div>
+           </div>
+
+           <!-- Account Security Card -->
+           <div class="section-card">
+             <div class="section-header">
+               <h3>Account Security</h3>
+             </div>
+             <div class="security-options">
+               <button class="security-option" disabled title="Managed by Keycloak">
+                 <div class="option-icon">
+                   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                     <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+                     <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+                   </svg>
+                 </div>
+                 <div class="option-content">
+                   <span class="option-title">Change Password</span>
+                   <span class="option-hint">Update your password via Keycloak</span>
+                 </div>
+                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                   <polyline points="9 18 15 12 9 6"/>
+                 </svg>
+               </button>
+
+               <button class="security-option" disabled title="Managed by Keycloak">
+                 <div class="option-icon">
+                   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                     <rect x="5" y="2" width="14" height="20" rx="2" ry="2"/>
+                     <line x1="12" y1="18" x2="12.01" y2="18"/>
+                   </svg>
+                 </div>
+                 <div class="option-content">
+                   <span class="option-title">Two-Factor Authentication</span>
+                   <span class="option-hint">Add extra security to your account</span>
+                 </div>
+                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                   <polyline points="9 18 15 12 9 6"/>
+                 </svg>
+               </button>
+             </div>
+           </div>
+
+           <!-- Account Actions -->
+           <div class="section-card">
+             <div class="section-header">
+               <h3>Account Actions</h3>
+             </div>
+             <div class="account-actions">
+               <button class="action-btn btn-logout" (click)="logout()">
+                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                   <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+                   <polyline points="16 17 21 12 16 7"/>
+                   <line x1="21" y1="12" x2="9" y2="12"/>
+                 </svg>
+                 Sign Out
+               </button>
+             </div>
+           </div>
+         </div>
+       </div>
+     </div>
+   }
+</div>

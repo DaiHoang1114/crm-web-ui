@@ -1,17 +1,20 @@
-import { Injectable } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { Injectable, inject } from '@angular/core';
 import Keycloak from 'keycloak-js';
+import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
 })
 export class KeycloakAuthService {
-  private keycloak!: Keycloak;
+  private keycloak: Keycloak | null = null;
   private initialized = false;
   private mockMode = !environment.useKeycloak;
 
-  constructor() {
+  constructor(private readonly http: HttpClient) {
     if (!this.mockMode) {
+      console.log('Creating Keycloak instance with config:', environment.keycloak);
       this.keycloak = new Keycloak(environment.keycloak);
     }
   }
@@ -28,34 +31,29 @@ export class KeycloakAuthService {
       return true;
     }
 
+    if (!this.keycloak) {
+      throw new Error('Keycloak instance not created');
+    }
+
     try {
       console.log('🔐 Initializing Keycloak...');
+      console.log('URL:', environment.keycloak.url);
       console.log('Realm:', environment.keycloak.realm);
       console.log('Client ID:', environment.keycloak.clientId);
-      console.log('URL:', environment.keycloak.url);
 
-      // Set a timeout to prevent infinite loading
-      const initPromise = this.keycloak.init({
+      this.initialized = await this.keycloak.init({
         onLoad: 'check-sso',
         silentCheckSsoRedirectUri: window.location.origin + '/assets/silent-check-sso.html',
         checkLoginIframe: false,
         pkceMethod: 'S256',
         enableLogging: true,
-        flow: 'standard'
       });
-
-      // Add timeout
-      const timeoutPromise = new Promise<boolean>((_, reject) => {
-        setTimeout(() => reject(new Error('Keycloak initialization timeout')), 10000);
-      });
-
-      this.initialized = await Promise.race([initPromise, timeoutPromise]);
 
       console.log('✅ Keycloak initialized successfully');
       console.log('Authenticated:', this.keycloak.authenticated);
 
       if (this.keycloak.authenticated) {
-        console.log('✅ User:', this.keycloak.tokenParsed?.['preferred_username']);
+        console.log('✅ User authenticated:', this.keycloak.tokenParsed?.['preferred_username']);
       } else {
         console.log('ℹ️ User not authenticated - SSO check complete');
       }
@@ -63,22 +61,18 @@ export class KeycloakAuthService {
       return this.initialized;
     } catch (error) {
       console.error('❌ Failed to initialize Keycloak', error);
-      console.error('Check:');
-      console.error('1. Realm exists:', `${environment.keycloak.url}/realms/${environment.keycloak.realm}`);
-      console.error('2. Client exists with ID:', environment.keycloak.clientId);
-      console.error('3. CORS configured for http://localhost:4200');
       throw error;
     }
   }
 
   getToken(): string {
     if (this.mockMode) return 'mock-jwt-token';
-    return this.keycloak.token ?? '';
+    return this.keycloak?.token ?? '';
   }
 
   isLoggedIn(): boolean {
     if (this.mockMode) return true;
-    return this.keycloak.authenticated || false;
+    return this.keycloak?.authenticated || false;
   }
 
   login(options?: Keycloak.KeycloakLoginOptions): Promise<void> {
@@ -86,7 +80,25 @@ export class KeycloakAuthService {
       console.log('🔧 Mock login');
       return Promise.resolve();
     }
-    return this.keycloak.login(options);
+
+    // Check if keycloak is initialized
+    if (!this.keycloak) {
+      console.error('❌ Keycloak not initialized!');
+      return Promise.reject(new Error('Keycloak not initialized'));
+    }
+
+    console.log('🔐 Redirecting to Keycloak login...', options);
+
+    // The login method doesn't return a promise in the traditional sense
+    // It redirects the browser, so we wrap it
+    try {
+      this.keycloak.login(options);
+      // Return a promise that never resolves because we're redirecting
+      return new Promise(() => {});
+    } catch (error) {
+      console.error('❌ Login error:', error);
+      return Promise.reject(error);
+    }
   }
 
   logout(redirectUri?: string): Promise<void> {
@@ -94,7 +106,17 @@ export class KeycloakAuthService {
       console.log('🔧 Mock logout');
       return Promise.resolve();
     }
-    return this.keycloak.logout({ redirectUri });
+
+    if (!this.keycloak) {
+      return Promise.reject(new Error('Keycloak not initialized'));
+    }
+
+    try {
+      this.keycloak.logout({ redirectUri });
+      return new Promise(() => {});
+    } catch (error) {
+      return Promise.reject(error);
+    }
   }
 
   loadUserProfile(): Promise<Keycloak.KeycloakProfile> {
@@ -107,22 +129,39 @@ export class KeycloakAuthService {
         emailVerified: true,
       });
     }
+
+    if (!this.keycloak) {
+      return Promise.reject(new Error('Keycloak not initialized'));
+    }
+
     return this.keycloak.loadUserProfile();
+  }
+
+  updateUserProfile(firstName: string, lastName: string): Observable<void> {
+    const request : {
+      firstName?: string;
+      lastName?: string;
+    } = {
+      firstName,
+      lastName
+    }
+
+    return this.http.put<void>(`${environment.crm.url}/api/user/profile`, request);
   }
 
   getUsername(): string {
     if (this.mockMode) return 'demo-user';
-    return this.keycloak.tokenParsed?.['preferred_username'] || '';
+    return this.keycloak?.tokenParsed?.['preferred_username'] || '';
   }
 
   isUserInRole(role: string): boolean {
     if (this.mockMode) return true;
-    return this.keycloak.hasRealmRole(role);
+    return this.keycloak?.hasRealmRole(role) || false;
   }
 
   getUserRoles(): string[] {
     if (this.mockMode) return ['user', 'admin', 'analyst'];
-    return this.keycloak.realmAccess?.roles || [];
+    return this.keycloak?.realmAccess?.roles || [];
   }
 
   hasAnyRole(roles: string[]): boolean {
@@ -137,6 +176,11 @@ export class KeycloakAuthService {
 
   updateToken(minValidity: number = 5): Promise<boolean> {
     if (this.mockMode) return Promise.resolve(true);
+
+    if (!this.keycloak) {
+      return Promise.reject(new Error('Keycloak not initialized'));
+    }
+
     return this.keycloak.updateToken(minValidity);
   }
 
@@ -155,6 +199,6 @@ export class KeycloakAuthService {
         family_name: 'User',
       } as any;
     }
-    return this.keycloak.tokenParsed;
+    return this.keycloak?.tokenParsed;
   }
 }

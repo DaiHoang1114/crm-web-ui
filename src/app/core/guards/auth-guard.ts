@@ -9,10 +9,18 @@ export const authGuard: CanActivateFn = async (route, state) => {
   try {
     const isLoggedIn = keycloak.isLoggedIn();
 
+    // If not logged in, redirect to Keycloak login page
     if (!isLoggedIn) {
-      await keycloak.login({
+      console.log('⚠️ User not authenticated, redirecting to Keycloak login...');
+
+      // This will cause a page redirect, so we don't need to await it
+      keycloak.login({
         redirectUri: window.location.origin + state.url,
+      }).catch(error => {
+        console.error('❌ Login redirect failed:', error);
       });
+
+      // Return false to stop navigation
       return false;
     }
 
@@ -22,15 +30,16 @@ export const authGuard: CanActivateFn = async (route, state) => {
       const hasRole = requiredRoles.some(role => keycloak.isUserInRole(role));
 
       if (!hasRole) {
+        console.log('⚠️ User lacks required roles:', requiredRoles);
         router.navigate(['/unauthorized']);
         return false;
       }
     }
 
+    console.log('✅ User authenticated and authorized');
     return true;
   } catch (error) {
-    console.error('Auth guard error:', error);
-    router.navigate(['/error']);
+    console.error('❌ Auth guard error:', error);
     return false;
   }
 };
