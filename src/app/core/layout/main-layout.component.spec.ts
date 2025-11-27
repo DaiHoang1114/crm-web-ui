@@ -1,28 +1,29 @@
-/* tslint:disable:no-unused-variable */
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
-import { By } from '@angular/platform-browser';
-import { DebugElement } from '@angular/core';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { MainLayout } from './main-layout.component';
+import { provideRouter } from '@angular/router';
 
-import { LayoutComponent } from './main-layout.component';
+describe('MainLayout', () => {
+  let component: MainLayout;
+  let fixture: ComponentFixture<MainLayout>;
 
-describe('LayoutComponent', () => {
-  let component: LayoutComponent;
-  let fixture: ComponentFixture<LayoutComponent>;
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
+      imports: [MainLayout],
+      providers: [provideRouter([])]
+    }).compileComponents();
 
-  beforeEach(async(() => {
-    TestBed.configureTestingModule({
-      declarations: [ LayoutComponent ]
-    })
-    .compileComponents();
-  }));
-
-  beforeEach(() => {
-    fixture = TestBed.createComponent(LayoutComponent);
+    fixture = TestBed.createComponent(MainLayout);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });
 
   it('should create', () => {
     expect(component).toBeTruthy();
+  });
+
+  it('should toggle sidebar', () => {
+    const initialState = component.isSidebarCollapsed;
+    component.onToggleSidebar();
+    expect(component.isSidebarCollapsed).toBe(!initialState);
   });
 });
