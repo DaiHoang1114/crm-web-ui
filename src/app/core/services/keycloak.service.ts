@@ -47,6 +47,7 @@ export class KeycloakAuthService {
         checkLoginIframe: false,
         pkceMethod: 'S256',
         enableLogging: true,
+        silentCheckSsoFallback: false,
       });
 
       console.log('✅ Keycloak initialized successfully');
